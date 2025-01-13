@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"log"
 
+	"github.com/gabrielfmcoelho/platform-core/bootstrap/seeds"
 	"gorm.io/gorm"
 )
 
@@ -10,15 +11,15 @@ import (
 func RunSeeds(db *gorm.DB) {
 	// Podemos rodar dentro de uma transação, caso deseje atomicidade
 	err := db.Transaction(func(tx *gorm.DB) error {
-		if err := SeedUserRoles(tx); err != nil {
+		if err := seeds.SeedUserRoles(tx); err != nil {
 			return err
 		}
 
-		if err := SeedOrganizations(tx); err != nil {
+		if err := seeds.SeedOrganizations(tx); err != nil {
 			return err
 		}
 
-		if err := SeedUsers(tx); err != nil {
+		if err := seeds.SeedUsers(tx); err != nil {
 			return err
 		}
 
