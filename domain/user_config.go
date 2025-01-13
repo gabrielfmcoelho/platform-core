@@ -4,10 +4,12 @@ import (
 	"gorm.io/gorm"
 )
 
+// ONE TO ONE WITH USER
+
 type UserConfig struct {
 	gorm.Model
-	UserID          uint                `gorm:"not null"`
-	ServicesConfigs []UserServiceConfig `gorm:"foreignKey:UserID"`
+	UserID          uint                `gorm:"not null;uniqueIndex"`
+	ServicesConfigs []UserServiceConfig `gorm:"foreignKey:UserConfigID"`
 }
 
 type UserConfigRepository interface {

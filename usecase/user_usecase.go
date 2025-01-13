@@ -22,21 +22,22 @@ func NewUserUsecase(userRepository domain.UserRepository, timeout time.Duration)
 	}
 }
 
-func (uu *UserUsecase) Create(c context.Context, user *domain.User) error {
+func (uu *UserUsecase) Create(c context.Context, createUser *domain.CreateUser) error {
 	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
 	defer cancel()
 
-	_, err := uu.userRepository.GetByEmail(ctx, user.Email)
+	_, err := uu.userRepository.GetByEmail(ctx, createUser.Email)
 	if err == nil {
 		return domain.ErrUserAlreadyExists
 	}
 
-	hashedPassword, err := password.HashPassword(user.Password)
+	hashedPassword, err := password.HashPassword(createUser.Password)
 	if err != nil {
 		return err
 	}
+	createUser.Password = hashedPassword
 
-	user.Password = hashedPassword
+	user := internal.ParseCreateUser(createUser)
 
 	err = uu.userRepository.Create(ctx, user)
 	if err != nil {
@@ -64,7 +65,7 @@ func (uu *UserUsecase) Fetch(c context.Context) ([]domain.PublicUser, error) {
 	// parse the users to domain.PublicUser
 	publicUsers := make([]domain.PublicUser, 0)
 	for _, user := range users {
-		publicUsers = append(publicUsers, internal.ParseUser(user))
+		publicUsers = append(publicUsers, internal.ParsePublicUser(user))
 	}
 
 	return publicUsers, nil
@@ -99,7 +100,7 @@ func (uu *UserUsecase) GetByIdentifier(c context.Context, identifier string) (do
 	} else {
 		return publicUser, domain.ErrInvalidIdentifier
 	}
-	return internal.ParseUser(user), nil
+	return internal.ParsePublicUser(user), nil
 }
 
 func (uu *UserUsecase) Update(c context.Context, userID uint, user *domain.User) error {

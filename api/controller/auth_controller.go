@@ -61,15 +61,9 @@ func (lc *AuthController) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, loginResponse)
 }
 
+// @Summary Login Guest
+// @Description Authenticates a guest user using their IP address, then returns access and refresh tokens for session management
 func (lc *AuthController) LoginGuest(c *gin.Context) {
-	var request domain.LoginGuestResquet
-
-	err := c.ShouldBind(&request)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, domain.ErrorResponse{Message: err.Error()})
-		return
-	}
-
 	loginResponse, err := lc.AuthUsecase.LoginGuestUser(
 		c,
 		lc.Env.AccessTokenSecret,

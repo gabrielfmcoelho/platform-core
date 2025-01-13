@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/gabrielfmcoelho/platform-core/domain"
@@ -63,6 +64,9 @@ func (au *AuthUsecase) LoginUserByEmail(c context.Context, email string, rawPass
 func (au *AuthUsecase) LoginGuestUser(c context.Context, accessSecret string, accessExpiry int, refreshSecret string, refreshExpiry int) (loginResponse *domain.LoginResponse, err error) {
 	ctx, cancel := context.WithTimeout(c, au.contextTimeout) // This creates a new context with a timeout and a cancel function, which should be called at the end of the function to release resources
 	defer cancel()
+
+	incomingIP := ctx.Value("ip").(string)
+	log.Println("Incoming IP:", incomingIP)
 
 	user, err := au.userRepository.GetByID(ctx, 1)
 	if err != nil {

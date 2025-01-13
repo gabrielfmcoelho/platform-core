@@ -6,6 +6,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// MANY TO MANY WITH ORGANIZATION
+
 type Service struct {
 	gorm.Model
 	MarketingName string         `gorm:"size:255;uniqueIndex;not null"`

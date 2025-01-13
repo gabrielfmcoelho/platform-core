@@ -10,11 +10,12 @@ type Organization struct {
 	gorm.Model
 	Name               string                   `gorm:"size:255;uniqueIndex;not null"`
 	LogoUrl            string                   `gorm:"size:255"`
-	Role               OrganizationRole         `gorm:"foreignKey:OrganizationID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	RoleID             uint                     `gorm:"not null"`
+	Role               OrganizationRole         `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	Users              []User                   `gorm:"foreignKey:OrganizationID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	SubscribedServices []Service                `gorm:"many2many:organization_services;"`
 	Subscription       OrganizationSubscription `gorm:"foreignKey:OrganizationID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	Metrics            []OrganizationMetrics    `gorm:"foreignKey:OrganizationID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	SubscribedServices []Service                `gorm:"many2many:organization_services;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Metrics            OrganizationMetrics      `gorm:"foreignKey:OrganizationID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 type CreateOrganization struct {

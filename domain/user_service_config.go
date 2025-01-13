@@ -6,11 +6,16 @@ import (
 	"gorm.io/gorm"
 )
 
+// MANY TO ONE WITH USER
+// MANY TO ONE WITH USERCONFIG
+// MANY TO ONE WITH SERVICE
+
 type UserServiceConfig struct {
 	gorm.Model
-	UserID    uint `gorm:"not null"`
-	ServiceID uint `gorm:"not null"`
-	IsPinned  bool `gorm:"default:false"`
+	UserID       uint `gorm:"not null;Index"`
+	UserConfigID uint `gorm:"not null;Index"`
+	ServiceID    uint `gorm:"not null;Index"`
+	IsPinned     bool `gorm:"default:false"`
 }
 
 type UserServiceConfigRepository interface {

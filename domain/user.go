@@ -6,25 +6,29 @@ import (
 	"gorm.io/gorm"
 )
 
+// MANY TO ONE WITH ORGANIZATION
+
 type User struct {
 	gorm.Model
-	IsArchived   bool         `gorm:"not null;default:false"` // Soft delete only removes from the system but keeps the data
-	Email        string       `gorm:"size:255;uniqueIndex;not null"`
-	Password     string       `gorm:"size:255;not null"`
-	Organization Organization `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	RoleID       uint
-	Role         UserRole
-	Bio          UserBio          `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	Metrics      UserMetrics      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	Configs      UserConfig       `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	Logs         []UserLog        `gorm:"foreignKey:UserID"`
-	ServiceLogs  []UserServiceLog `gorm:"foreignKey:UserID"`
+	IsArchived     bool             `gorm:"not null;default:false"` // Soft delete only removes from the system but keeps the data
+	Email          string           `gorm:"size:255;uniqueIndex;not null"`
+	Password       string           `gorm:"size:255;not null"`
+	OrganizationID uint             `gorm:"not nul;Index"`
+	Organization   Organization     `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"` // Relationship to Organization
+	RoleID         uint             `gorm:"not null;Index"`
+	Role           UserRole         `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"` // Relationship to UserRole
+	Bio            UserBio          `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Metrics        UserMetrics      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Configs        UserConfig       `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Logs           []UserLog        `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	ServiceLogs    []UserServiceLog `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 type CreateUser struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
-	Access   int    `json:"access" binding:"required"`
+	Email          string `json:"email" binding:"required,email"`
+	Password       string `json:"password" binding:"required"`
+	OrganizationID uint   `json:"organization_id" binding:"required"`
+	RoleID         uint   `json:"role" binding:"required"`
 }
 
 type PublicUser struct {
@@ -46,7 +50,7 @@ type UserRepository interface {
 }
 
 type UserUsecase interface {
-	Create(ctx context.Context, user *User) error
+	Create(ctx context.Context, user *CreateUser) error
 	Fetch(ctx context.Context) ([]PublicUser, error)
 	GetByIdentifier(ctx context.Context, identifier string) (PublicUser, error)
 	Update(ctx context.Context, userID uint, user *User) error

@@ -9,10 +9,6 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type LoginGuestResquet struct {
-	// ip
-}
-
 type LoginResponse struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`

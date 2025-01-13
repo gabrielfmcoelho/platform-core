@@ -16,7 +16,7 @@ func ParseUint(s string) (uint, error) {
 }
 
 // Parse domain.User to domain.PublicUser
-func ParseUser(user domain.User) domain.PublicUser {
+func ParsePublicUser(user domain.User) domain.PublicUser {
 	return domain.PublicUser{
 		ID:               user.ID,
 		Email:            user.Email,
@@ -24,5 +24,14 @@ func ParseUser(user domain.User) domain.PublicUser {
 		OrganizationID:   user.Organization.ID,
 		OrganizationName: user.Organization.Name,
 		RoleID:           user.Role.ID,
+	}
+}
+
+func ParseCreateUser(createUser *domain.CreateUser) *domain.User {
+	return &domain.User{
+		Email:          createUser.Email,
+		Password:       createUser.Password,
+		OrganizationID: createUser.OrganizationID,
+		RoleID:         createUser.RoleID,
 	}
 }

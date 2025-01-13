@@ -6,11 +6,13 @@ import (
 	"gorm.io/gorm"
 )
 
+// MANY TO ONE WITH USER
+
 type UserLog struct {
 	gorm.Model
-	UserID    uint   `gorm:"not null"`
+	UserID    uint   `gorm:"not null;Index"`
 	IPAddress string `gorm:"size:255"`
-	Date      string `gorm:"size:255"`
+	Date      string `gorm:"size:255;not null"`
 }
 
 type UserLogRepository interface {

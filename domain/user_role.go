@@ -6,11 +6,13 @@ import (
 	"gorm.io/gorm"
 )
 
+// ONE TO MANY WITH USER
 // Admin, Manager, User, Guest
 
 type UserRole struct {
 	gorm.Model
 	RoleName string `gorm:"size:255;uniqueIndex;not null"`
+	Users    []User `gorm:"foreignKey:RoleID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 type UserRoleRepository interface {

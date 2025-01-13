@@ -6,9 +6,11 @@ import (
 	"gorm.io/gorm"
 )
 
+// ONE TO ONE WITH USER
+
 type UserBio struct {
 	gorm.Model
-	UserID    uint   `gorm:"not null"`
+	UserID    uint   `gorm:"not null;uniqueIndex"`
 	FirstName string `gorm:"size:255"`
 	SurName   string `gorm:"size:255"`
 	Position  string `gorm:"size:255"`

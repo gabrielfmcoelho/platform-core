@@ -6,9 +6,12 @@ import (
 	"gorm.io/gorm"
 )
 
+// ONE TO MANY WITH ORGANIZATION
+
 type OrganizationRole struct {
 	gorm.Model
-	RoleName string `gorm:"size:255;uniqueIndex;not null"`
+	RoleName      string         `gorm:"size:255;uniqueIndex;not null"`
+	Organizations []Organization `gorm:"foreignKey:RoleID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 type OrganizationRoleRepository interface {

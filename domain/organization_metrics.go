@@ -4,9 +4,11 @@ import (
 	"gorm.io/gorm"
 )
 
+// ONE TO ONE WITH ORGANIZATION
+
 type OrganizationMetrics struct {
 	gorm.Model
-	OrganizationID           uint   `gorm:"not null"`
+	OrganizationID           uint   `gorm:"not null;uniqueIndex"`
 	TotalServices            int    `gorm:"default:0"`
 	TotalUsers               int    `gorm:"default:0"`
 	TotalReports             int    `gorm:"default:0"`

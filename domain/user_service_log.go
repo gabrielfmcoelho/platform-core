@@ -6,11 +6,14 @@ import (
 	"gorm.io/gorm"
 )
 
+// MANY TO ONE WITH USER
+// MANY TO ONE WITH SERVICE
+
 type UserServiceLog struct {
 	gorm.Model
-	UserID    uint   `gorm:"not null"`
-	ServiceID uint   `gorm:"not null"`
-	Date      string `gorm:"size:255"`
+	UserID    uint   `gorm:"not null;Index"`
+	ServiceID uint   `gorm:"not null;Index"`
+	Date      string `gorm:"size:255;not null"`
 	Duration  string `gorm:"size:255"`
 }
 

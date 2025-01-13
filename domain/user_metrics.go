@@ -6,9 +6,11 @@ import (
 	"gorm.io/gorm"
 )
 
+// ONE TO ONE WITH USER
+
 type UserMetrics struct {
 	gorm.Model
-	UserID             uint   `gorm:"not null"`
+	UserID             uint   `gorm:"not null;uniqueIndex"`
 	FavoriteServiceID  uint   `gorm:""`
 	LastIP             string `gorm:"size:255"`
 	LastLogin          string `gorm:"size:255"`

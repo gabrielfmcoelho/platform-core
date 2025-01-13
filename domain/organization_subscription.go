@@ -6,10 +6,12 @@ import (
 	"gorm.io/gorm"
 )
 
+// ONE TO ONE WITH ORGANIZATION
+
 type OrganizationSubscription struct {
 	gorm.Model
-	Active                   bool    `gorm:"not null;default:false"`
-	OrganizationID           uint    `gorm:"not null"`
+	Active                   bool    `gorm:"default:false"`
+	OrganizationID           uint    `gorm:"not null;uniqueIndex"`
 	SubscriptionValue        float64 `gorm:"not null"`
 	SubscriptionPeriod       string  `gorm:"not null"`
 	SubscriptionUsersLimit   int     `gorm:"not null"`
