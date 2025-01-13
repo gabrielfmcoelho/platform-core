@@ -9,7 +9,7 @@ import (
 
 func AutoMigrate(db *gorm.DB) {
 	err := db.AutoMigrate(
-		// add domains like: &domain.User{},
+		// domains like: &domain.User{},
 		&domain.User{},
 	)
 	if err != nil {

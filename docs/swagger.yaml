@@ -2,16 +2,19 @@ basePath: /
 definitions:
   domain.CreateUser:
     properties:
-      access:
-        type: integer
       email:
         type: string
+      organization_id:
+        type: integer
       password:
         type: string
+      role:
+        type: integer
     required:
-    - access
     - email
+    - organization_id
     - password
+    - role
     type: object
   domain.ErrorResponse:
     properties:

@@ -27,7 +27,7 @@ type UserController struct {
 // @Failure 500 {object} domain.ErrorResponse "Internal Server Error"
 // @Router /user/create [post]
 func (uc *UserController) CreateUser(c *gin.Context) {
-	var user domain.User
+	var user domain.CreateUser
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, domain.ErrorResponse{
 			Message: "Invalid input: " + err.Error(),

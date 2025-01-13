@@ -19,6 +19,8 @@ func App() Application {
 	// Run auto-migration
 	AutoMigrate(app.DB)
 
+	RunSeeds(app.DB)
+
 	return *app
 }
 

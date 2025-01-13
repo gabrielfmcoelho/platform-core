@@ -446,19 +446,23 @@ const docTemplate = `{
         "domain.CreateUser": {
             "type": "object",
             "required": [
-                "access",
                 "email",
-                "password"
+                "organization_id",
+                "password",
+                "role"
             ],
             "properties": {
-                "access": {
-                    "type": "integer"
-                },
                 "email": {
                     "type": "string"
                 },
+                "organization_id": {
+                    "type": "integer"
+                },
                 "password": {
                     "type": "string"
+                },
+                "role": {
+                    "type": "integer"
                 }
             }
         },
