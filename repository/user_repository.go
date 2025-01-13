@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"time"
+
 	"github.com/gabrielfmcoelho/platform-core/domain"
 	"gorm.io/gorm"
 )
@@ -80,7 +82,7 @@ func (r *userRepository) Archive(ctx context.Context, userID uint) error {
 	if err != nil {
 		return err
 	}
-	user.IsArchived = true
+	user.DeletedAt = gorm.DeletedAt{Time: time.Now()}
 	if err := r.db.WithContext(ctx).Save(user).Error; err != nil {
 		return domain.ErrDataBaseInternalError
 	}

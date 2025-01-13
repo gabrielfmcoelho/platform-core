@@ -10,7 +10,6 @@ import (
 
 type User struct {
 	gorm.Model
-	IsArchived     bool             `gorm:"not null;default:false"` // Soft delete only removes from the system but keeps the data
 	Email          string           `gorm:"size:255;uniqueIndex;not null"`
 	Password       string           `gorm:"size:255;not null"`
 	OrganizationID uint             `gorm:"not nul;Index"`
