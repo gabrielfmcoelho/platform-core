@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"errors"
-	"log"
 	"time"
 
 	"github.com/gabrielfmcoelho/platform-core/domain"
@@ -12,14 +11,16 @@ import (
 )
 
 type AuthUsecase struct {
-	userRepository domain.UserRepository
-	contextTimeout time.Duration
+	userRepository    domain.UserRepository
+	userLogRepository domain.UserLogRepository
+	contextTimeout    time.Duration
 }
 
-func NewAuthUsecase(userRepository domain.UserRepository, timeout time.Duration) *AuthUsecase {
+func NewAuthUsecase(userRepository domain.UserRepository, userLogRepository domain.UserLogRepository, timeout time.Duration) *AuthUsecase {
 	return &AuthUsecase{
-		userRepository: userRepository,
-		contextTimeout: timeout,
+		userRepository:    userRepository,
+		userLogRepository: userLogRepository,
+		contextTimeout:    timeout,
 	}
 }
 
@@ -54,6 +55,12 @@ func (au *AuthUsecase) LoginUserByEmail(c context.Context, email string, rawPass
 		return nil, err
 	}
 
+	// LOG INTO USER LOG
+	au.userLogRepository.Create(ctx, &domain.UserLog{
+		UserID: user.ID,
+		Action: "login",
+	})
+
 	// return the login response
 	return &domain.LoginResponse{
 		AccessToken:  accessToken,
@@ -65,10 +72,12 @@ func (au *AuthUsecase) LoginGuestUser(c context.Context, accessSecret string, ac
 	ctx, cancel := context.WithTimeout(c, au.contextTimeout) // This creates a new context with a timeout and a cancel function, which should be called at the end of the function to release resources
 	defer cancel()
 
-	incomingIP := ctx.Value("ip").(string)
-	log.Println("Incoming IP:", incomingIP)
+	//log.Println("Requesting IP")
+	//incomingIP := ctx.Value("ip").(string) DOES NOT WORK
+	//log.Println("Incoming IP:", incomingIP)
 
-	user, err := au.userRepository.GetByID(ctx, 1)
+	user, err := au.userRepository.GetByID(ctx, 4)
+
 	if err != nil {
 		return nil, err
 	}
@@ -84,6 +93,12 @@ func (au *AuthUsecase) LoginGuestUser(c context.Context, accessSecret string, ac
 	if err != nil {
 		return nil, err
 	}
+
+	// LOG INTO USER LOG
+	au.userLogRepository.Create(ctx, &domain.UserLog{
+		UserID: user.ID,
+		Action: "login",
+	})
 
 	return &domain.LoginResponse{
 		AccessToken:  accessToken,

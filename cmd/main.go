@@ -6,6 +6,7 @@ import (
 
 	"github.com/gabrielfmcoelho/platform-core/api/route"
 	"github.com/gabrielfmcoelho/platform-core/bootstrap"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -44,6 +45,16 @@ func main() {
 
 	// Create a Gin router instance
 	router := gin.Default()
+
+	// CORS
+	router.Use(cors.New(cors.Config{
+		//AllowAllOrigins: true,
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"*"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// Route binding
 	route.Setup(env, timeout, db, router)

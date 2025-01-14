@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/gabrielfmcoelho/platform-core/domain"
+	"github.com/gabrielfmcoelho/platform-core/internal"
 )
 
 type organizationUsecase struct {
@@ -42,7 +43,7 @@ func (uc *organizationUsecase) Fetch(ctx context.Context) ([]domain.PublicOrgani
 
 	var result []domain.PublicOrganization
 	for _, org := range orgs {
-		result = append(result, uc.toPublicOrganization(org))
+		result = append(result, internal.ParsePublicOrganization(org))
 	}
 	return result, nil
 }
@@ -64,7 +65,7 @@ func (uc *organizationUsecase) GetByIdentifier(ctx context.Context, identifier s
 	if err != nil {
 		return domain.PublicOrganization{}, err
 	}
-	return uc.toPublicOrganization(org), nil
+	return internal.ParsePublicOrganization(org), nil
 }
 
 // GetUsers retorna a lista de usuários da organização, convertendo para PublicUser
@@ -101,41 +102,4 @@ func (uc *organizationUsecase) Update(ctx context.Context, organizationID uint, 
 // Delete remove a organização
 func (uc *organizationUsecase) Delete(ctx context.Context, organizationID uint) error {
 	return uc.repo.Delete(ctx, organizationID)
-}
-
-// ==================================================
-// Helpers
-// ==================================================
-
-func (uc *organizationUsecase) toPublicOrganization(org domain.Organization) domain.PublicOrganization {
-	// Converte domain.Organization -> domain.PublicOrganization
-	// Carrega Users
-	var publicUsers []domain.PublicUser
-	for _, u := range org.Users {
-		publicUsers = append(publicUsers, domain.PublicUser{
-			ID:               u.ID,
-			Email:            u.Email,
-			FirstName:        "", // mapeie se tiver no domain.User
-			OrganizationID:   u.OrganizationID,
-			OrganizationName: org.Name,
-			RoleID:           u.RoleID,
-		})
-	}
-
-	// Converte SubscribedServices
-	var publicServices []domain.PublicService
-	for _, srv := range org.SubscribedServices {
-		publicServices = append(publicServices, domain.PublicService{
-			ID:   srv.ID,
-			Name: srv.Name,
-		})
-	}
-
-	return domain.PublicOrganization{
-		ID:                 org.ID,
-		Name:               org.Name,
-		LogoUrl:            org.LogoUrl,
-		Users:              publicUsers,
-		SubscribedServices: publicServices,
-	}
 }

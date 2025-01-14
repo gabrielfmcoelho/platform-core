@@ -5,6 +5,8 @@ import (
 	"log"
 
 	"github.com/gabrielfmcoelho/platform-core/domain"
+	"github.com/gabrielfmcoelho/platform-core/internal"
+	"github.com/gabrielfmcoelho/platform-core/internal/password"
 	"gorm.io/gorm"
 )
 
@@ -18,25 +20,44 @@ func SeedUsers(db *gorm.DB) error {
 
 	// Se não tiver usuário nenhum, cria alguns
 	if count == 0 {
-		users := []domain.User{
+		users := []domain.CreateUser{
 			{
-				Email:          "admin@example.com",
+				Email:          "contato@solude.tech",
 				Password:       "admin123",
 				OrganizationID: 1,
 				RoleID:         1, // Ex: Role Admin
 			},
 			{
-				Email:          "user@example.com",
-				Password:       "user123",
+				Email:          "gabrielcoelho@inovadata.tech",
+				Password:       "123",
+				OrganizationID: 1,
+				RoleID:         1, // Ex: Role User
+			},
+			{
+				Email:          "contato@hsm.com",
+				Password:       "123",
 				OrganizationID: 2,
-				RoleID:         2, // Ex: Role User
+				RoleID:         2, // Ex: Role Manager
+			},
+			{
+				Email:          "guest@solude.tech",
+				Password:       "123",
+				OrganizationID: 4,
+				RoleID:         3, // Ex: Role Guest
 			},
 		}
 
-		if err := db.Create(&users).Error; err != nil {
-			return err
+		for _, u := range users {
+			hashedPassword, err := password.HashPassword(u.Password)
+			if err != nil {
+				return err
+			}
+			u.Password = hashedPassword
+			user := internal.ParseCreateUser(&u)
+			if err := db.Create(&user).Error; err != nil {
+				return err
+			}
 		}
-
 		log.Printf("Users seed executado: criados %d usuários\n", len(users))
 	}
 	return nil

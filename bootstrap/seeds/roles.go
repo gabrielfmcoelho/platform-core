@@ -41,8 +41,7 @@ func SeedOrganizationRoles(db *gorm.DB) error {
 	if count == 0 {
 		roles := []domain.OrganizationRole{
 			{RoleName: "Admin"},
-			{RoleName: "Manager"},
-			{RoleName: "User"},
+			{RoleName: "Hospital"},
 			{RoleName: "Guest"},
 		}
 

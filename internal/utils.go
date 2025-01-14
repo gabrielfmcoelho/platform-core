@@ -2,6 +2,7 @@ package internal
 
 import (
 	"strconv"
+	"unicode"
 
 	"github.com/gabrielfmcoelho/platform-core/domain"
 )
@@ -34,4 +35,54 @@ func ParseCreateUser(createUser *domain.CreateUser) *domain.User {
 		OrganizationID: createUser.OrganizationID,
 		RoleID:         createUser.RoleID,
 	}
+}
+
+func ParsePublicOrganization(org domain.Organization) domain.PublicOrganization {
+	// Converte domain.Organization -> domain.PublicOrganization
+	// Carrega Users
+	var publicUsers []domain.PublicUser
+	for _, u := range org.Users {
+		publicUsers = append(publicUsers, domain.PublicUser{
+			ID:               u.ID,
+			Email:            u.Email,
+			FirstName:        "", // mapeie se tiver no domain.User
+			OrganizationID:   u.OrganizationID,
+			OrganizationName: org.Name,
+			RoleID:           u.RoleID,
+		})
+	}
+
+	// Converte SubscribedServices
+	var publicServices []domain.PublicService
+	for _, srv := range org.SubscribedServices {
+		publicServices = append(publicServices, domain.PublicService{
+			ID:   srv.ID,
+			Name: srv.Name,
+		})
+	}
+
+	return domain.PublicOrganization{
+		ID:                 org.ID,
+		Name:               org.Name,
+		LogoUrl:            org.LogoUrl,
+		Users:              publicUsers,
+		SubscribedServices: publicServices,
+	}
+}
+
+// parsePublicService converte de domain.Service para domain.PublicService
+func ParsePublicService(s domain.Service) domain.PublicService {
+	return domain.PublicService{
+		ID:   s.ID,
+		Name: s.Name,
+	}
+}
+
+func IsNumeric(s string) bool {
+	for _, r := range s {
+		if !unicode.IsDigit(r) {
+			return false
+		}
+	}
+	return true
 }

@@ -11,6 +11,10 @@ import (
 func RunSeeds(db *gorm.DB) {
 	// Podemos rodar dentro de uma transação, caso deseje atomicidade
 	err := db.Transaction(func(tx *gorm.DB) error {
+		if err := seeds.SeedServices(tx); err != nil {
+			return err
+		}
+
 		if err := seeds.SeedOrganizationRoles(tx); err != nil {
 			return err
 		}

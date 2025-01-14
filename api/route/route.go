@@ -26,16 +26,17 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *gorm.DB, router *gin.E
 	router.GET("/docs/*any", ginredoc.New(doc))
 
 	// All Public APIs
-	publicRouter := router.Group("/public")
+	publicRouter := router.Group("/")
 	//NewSignupRouter(env, timeout, db, publicRouter)
 	NewAuthRouter(env, timeout, db, publicRouter)
 	//NewRefreshTokenRouter(env, timeout, db, publicRouter)
 
 	// All Private APIs
-	protectedRouter := router.Group("/private")
+	protectedRouter := router.Group("/")
 	/// Middleware to verify AccessToken
 	protectedRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
 	NewUserRouter(env, timeout, db, protectedRouter)
+	NewServiceRouter(env, timeout, db, protectedRouter)
 	//NewProfileRouter(env, timeout, db, protectedRouter)
 	//NewTaskRouter(env, timeout, db, protectedRouter)
 }

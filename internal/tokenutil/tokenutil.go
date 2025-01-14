@@ -20,8 +20,7 @@ func CreateAccessToken(user *domain.User, secret string, expiry int) (accessToke
 	claims := &domain.JwtCustomClaims{
 		UserRoleID: user.Role.ID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ID:        parseUintToHex(user.ID),
-			Subject:   user.Bio.FirstName,
+			Subject:   parseUintToHex(user.ID),
 			ExpiresAt: jwt.NewNumericDate(expireTime),
 		},
 	}
@@ -39,8 +38,7 @@ func CreateRefreshToken(user *domain.User, secret string, expiry int) (refreshTo
 	claimsRefresh := &domain.JwtCustomRefreshClaims{
 		UserRoleID: user.Role.ID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ID:        parseUintToHex(user.ID),
-			Subject:   user.Bio.FirstName,
+			Subject:   parseUintToHex(user.ID),
 			ExpiresAt: jwt.NewNumericDate(expireTime),
 		},
 	}
@@ -85,7 +83,7 @@ func ExtractIDFromToken(requestToken string, secret string) (string, error) {
 		return "", fmt.Errorf("invalid token")
 	}
 
-	return claims["id"].(string), nil
+	return claims["sub"].(string), nil
 }
 
 func SkipTokenValidation(requestToken string) (bool, error) {

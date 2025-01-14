@@ -21,6 +21,13 @@ definitions:
       message:
         type: string
     type: object
+  domain.Heartbeat:
+    properties:
+      duration:
+        type: integer
+      log_id:
+        type: integer
+    type: object
   domain.LoginRequest:
     properties:
       email:
@@ -38,6 +45,13 @@ definitions:
       refreshToken:
         type: string
     type: object
+  domain.PublicService:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   domain.PublicUser:
     properties:
       email:
@@ -53,12 +67,25 @@ definitions:
       role_id:
         type: integer
     type: object
+  domain.PublicUserServiceLog:
+    properties:
+      duration:
+        type: number
+      id:
+        type: integer
+      service_id:
+        type: integer
+      user_id:
+        type: integer
+    type: object
   domain.RefreshTokenResponse:
     properties:
       accessToken:
         type: string
       refreshToken:
         type: string
+    type: object
+  domain.Service:
     type: object
   domain.SuccessResponse:
     properties:
@@ -68,6 +95,13 @@ definitions:
         type: string
       status:
         type: string
+    type: object
+  domain.UseService:
+    properties:
+      log_id:
+        type: integer
+      service:
+        $ref: '#/definitions/domain.PublicService'
     type: object
   domain.User:
     type: object
@@ -162,6 +196,27 @@ paths:
       summary: Login user
       tags:
       - Auth User
+  /login-guest:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a guest user using their IP address, then returns
+        access and refresh tokens for session management
+      operationId: loginGuest
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful login, returns access and refresh tokens
+          schema:
+            $ref: '#/definitions/domain.LoginResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Login Guest
+      tags:
+      - Auth User
   /refresh-token:
     post:
       consumes:
@@ -235,6 +290,299 @@ paths:
       summary: Reset Password
       tags:
       - Auth User
+  /services:
+    get:
+      description: Gets all available services
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.PublicService'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Fetch Services
+      tags:
+      - Service
+    post:
+      consumes:
+      - application/json
+      description: Creates a new service
+      parameters:
+      - description: Service data
+        in: body
+        name: service
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Service'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Service'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Create Service
+      tags:
+      - Service
+  /services/{identifier}:
+    get:
+      description: Gets service by numeric ID (e.g., /services/123) or name (/services/my-service)
+      parameters:
+      - description: Service ID or Name
+        in: path
+        name: identifier
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.PublicService'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Get Service by Identifier
+      tags:
+      - Service
+  /services/{serviceID}:
+    delete:
+      description: Deletes a service
+      parameters:
+      - description: Service ID
+        in: path
+        name: serviceID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Delete Service
+      tags:
+      - Service
+    put:
+      consumes:
+      - application/json
+      description: Updates service data
+      parameters:
+      - description: Service ID
+        in: path
+        name: serviceID
+        required: true
+        type: integer
+      - description: Service data
+        in: body
+        name: service
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Service'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Service'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Update Service
+      tags:
+      - Service
+  /services/{serviceID}/organization/{organizationID}:
+    post:
+      description: Links the service to an organization
+      parameters:
+      - description: Service ID
+        in: path
+        name: serviceID
+        required: true
+        type: integer
+      - description: Organization ID
+        in: path
+        name: organizationID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.SuccessResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Set Service Availability
+      tags:
+      - Service
+  /services/{serviceID}/use:
+    post:
+      consumes:
+      - application/json
+      description: Logs that a user started using a service, returns log ID and public
+        service data
+      parameters:
+      - description: Service ID
+        in: path
+        name: serviceID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UseService'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Start using a service (create a usage log)
+      tags:
+      - Service
+  /services/heartbeat:
+    patch:
+      consumes:
+      - application/json
+      description: Adds usage duration (in seconds) to a log record
+      parameters:
+      - description: Heartbeat data
+        in: body
+        name: heartbeat
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Heartbeat'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.SuccessResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Heartbeat usage
+      tags:
+      - Service
+  /user-service-logs:
+    get:
+      description: Gets all user-service log entries
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.PublicUserServiceLog'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Fetch all UserServiceLogs
+      tags:
+      - UserServiceLog
+  /user-service-logs/{identifier}:
+    get:
+      description: Gets a user-service log entry by a flexible identifier
+      parameters:
+      - description: Identifier
+        in: path
+        name: identifier
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.PublicUserServiceLog'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Get a UserServiceLog by ID or user:XXX or service:XXX
+      tags:
+      - UserServiceLog
+  /user-service-logs/{logID}:
+    delete:
+      description: Removes a user-service log record
+      parameters:
+      - description: UserServiceLog ID
+        in: path
+        name: logID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Delete a UserServiceLog
+      tags:
+      - UserServiceLog
   /user/{id}:
     delete:
       description: Delete user by ID

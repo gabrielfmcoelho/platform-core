@@ -13,13 +13,15 @@ import (
 
 func NewAuthRouter(env *bootstrap.Env, timeout time.Duration, db *gorm.DB, group *gin.RouterGroup) {
 	ur := repository.NewUserRepository(db)
-	lc := &controller.AuthController{
-		AuthUsecase: usecase.NewAuthUsecase(ur, timeout),
+	ulr := repository.NewUserLogRepository(db)
+	ac := &controller.AuthController{
+		AuthUsecase: usecase.NewAuthUsecase(ur, ulr, timeout),
 		Env:         env,
 	}
 
-	group.POST("/login", lc.Login)
-	group.POST("/forgot-password", lc.ForgotPassword)
-	group.POST("/reset-password", lc.ResetPassword)
-	group.POST("/refresh-token", lc.RefreshToken)
+	group.POST("/login", ac.Login)
+	group.POST("/login-guest", ac.LoginGuest)
+	group.POST("/forgot-password", ac.ForgotPassword)
+	group.POST("/reset-password", ac.ResetPassword)
+	group.POST("/refresh-token", ac.RefreshToken)
 }
