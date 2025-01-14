@@ -9,6 +9,7 @@ import (
 type Organization struct {
 	gorm.Model
 	Name               string                   `gorm:"size:255;uniqueIndex;not null"`
+	Nickname           string                   `gorm:"size:255"`
 	LogoUrl            string                   `gorm:"size:255"`
 	RoleID             uint                     `gorm:"not null"`
 	Role               OrganizationRole         `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
@@ -24,11 +25,10 @@ type CreateOrganization struct {
 }
 
 type PublicOrganization struct {
-	ID                 uint            `json:"id"`
-	Name               string          `json:"name"`
-	LogoUrl            string          `json:"logo_url"`
-	Users              []PublicUser    `json:"users"`
-	SubscribedServices []PublicService `json:"subscribed_services"`
+	ID       uint   `json:"id"`
+	Name     string `json:"name"`
+	Nickname string `json:"nickname"`
+	LogoUrl  string `json:"logo_url"`
 }
 
 type OrganizationRepository interface {

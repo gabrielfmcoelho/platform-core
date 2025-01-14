@@ -31,14 +31,16 @@ func SeedOrganizations(db *gorm.DB) error {
 			},
 			{
 				Name:               "Hospital São Marcos",
+				Nickname:           "HSM",
 				LogoUrl:            "https://example.com/logo-beta.png",
 				RoleID:             2, // por exemplo, se 2 = "Manager"
 				SubscribedServices: []domain.Service{resistracker},
 			},
 			{
-				Name:    "Hospital Universitário - UFPI",
-				LogoUrl: "https://example.com/logo-beta.png",
-				RoleID:  2,
+				Name:     "Hospital Universitário - UFPI",
+				Nickname: "HU - UFPI",
+				LogoUrl:  "https://example.com/logo-beta.png",
+				RoleID:   2,
 			},
 			{
 				Name:    "Guest Organization",

@@ -51,7 +51,7 @@ func (sc *ServiceController) CreateService(c *gin.Context) {
 // @Description Gets all available services
 // @Tags Service
 // @Produce json
-// @Success 200 {array} domain.PublicService
+// @Success 200 {array} domain.SuccessResponse{data=[]domain.PublicService}
 // @Failure 500 {object} domain.ErrorResponse
 // @Router /services [get]
 func (sc *ServiceController) FetchServices(c *gin.Context) {

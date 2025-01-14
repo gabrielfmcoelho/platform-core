@@ -30,6 +30,7 @@ func SeedServices(db *gorm.DB) error {
 				LastUpdate:    "2021-09-01",
 				Status:        "Online",
 				Price:         0.00,
+				IsMarketing:   true,
 			},
 		}
 
