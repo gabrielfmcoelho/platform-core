@@ -19,10 +19,10 @@ type UserServiceLog struct {
 }
 
 type PublicUserServiceLog struct {
-	ID        uint    `json:"id"`
-	UserID    uint    `json:"user_id"`
-	ServiceID uint    `json:"service_id"`
-	Duration  float32 `json:"duration"`
+	ID        uint `json:"id"`
+	UserID    uint `json:"user_id"`
+	ServiceID uint `json:"service_id"`
+	Duration  int  `json:"duration"`
 }
 
 type UserServiceLogRepository interface {
@@ -36,7 +36,7 @@ type UserServiceLogRepository interface {
 }
 
 type UserServiceLogUsecase interface {
-	Fetch(ctx context.Context) ([]UserServiceLog, error)
-	GetByIdentifier(ctx context.Context, identifier string) (UserServiceLog, error)
+	Fetch(ctx context.Context) ([]PublicUserServiceLog, error)
+	GetByIdentifier(ctx context.Context, identifier string) (PublicUserServiceLog, error)
 	Delete(ctx context.Context, UserServiceLogID uint) error
 }

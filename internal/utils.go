@@ -3,6 +3,7 @@ package internal
 import (
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/gabrielfmcoelho/platform-core/domain"
@@ -37,4 +38,9 @@ func ParseDelimitedStrings(s string) []string {
 		parts[i] = strings.TrimSpace(parts[i])
 	}
 	return parts
+}
+
+// Parse time.Duration to int (seconds)
+func ToSeconds(d time.Duration) int {
+	return int(d.Seconds())
 }

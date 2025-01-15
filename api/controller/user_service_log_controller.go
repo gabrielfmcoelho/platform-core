@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gabrielfmcoelho/platform-core/domain"
+	"github.com/gabrielfmcoelho/platform-core/internal/parser"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,7 +18,7 @@ type UserServiceLogController struct {
 // @Description Gets all user-service log entries
 // @Tags UserServiceLog
 // @Produce json
-// @Success 200 {array} domain.PublicUserServiceLog
+// @Success 200 {array} domain.SuccessResponse{data=[]domain.PublicUserServiceLog}
 // @Failure 500 {object} domain.ErrorResponse
 // @Router /user-service-logs [get]
 func (ctrl *UserServiceLogController) FetchUserServiceLogs(c *gin.Context) {
@@ -26,7 +27,7 @@ func (ctrl *UserServiceLogController) FetchUserServiceLogs(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, logs)
+	c.JSON(http.StatusOK, parser.ToSuccessResponse(logs))
 }
 
 // GetUserServiceLogByIdentifier
@@ -35,7 +36,7 @@ func (ctrl *UserServiceLogController) FetchUserServiceLogs(c *gin.Context) {
 // @Tags UserServiceLog
 // @Produce json
 // @Param identifier path string true "Identifier"
-// @Success 200 {object} domain.PublicUserServiceLog
+// @Success 200 {object} domain.SuccessResponse{data=domain.PublicUserServiceLog}
 // @Failure 400 {object} domain.ErrorResponse
 // @Failure 404 {object} domain.ErrorResponse
 // @Failure 500 {object} domain.ErrorResponse
@@ -56,7 +57,7 @@ func (ctrl *UserServiceLogController) GetUserServiceLogByIdentifier(c *gin.Conte
 		return
 	}
 
-	c.JSON(http.StatusOK, log)
+	c.JSON(http.StatusOK, parser.ToSuccessResponse(log))
 }
 
 // DeleteUserServiceLog

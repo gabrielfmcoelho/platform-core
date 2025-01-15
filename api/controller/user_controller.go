@@ -5,8 +5,8 @@ import (
 
 	"github.com/gabrielfmcoelho/platform-core/bootstrap"
 	"github.com/gabrielfmcoelho/platform-core/domain"
-
 	"github.com/gabrielfmcoelho/platform-core/internal"
+	"github.com/gabrielfmcoelho/platform-core/internal/parser"
 	"github.com/gin-gonic/gin"
 )
 
@@ -51,7 +51,7 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 // @Tags User
 // @ID fetchUsers
 // @Produce json
-// @Success 200 {object} []domain.PublicUser "List of users"
+// @Success 200 {object} domain.SuccessResponse{data=[]domain.PublicUser} "List of users"
 // @Failure 500 {object} domain.ErrorResponse "Internal Server Error"
 // @Router /users [get]
 func (uc *UserController) FetchUsers(c *gin.Context) {
@@ -63,7 +63,7 @@ func (uc *UserController) FetchUsers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK, parser.ToSuccessResponse(users))
 }
 
 // @Summary Get user by ID or email
@@ -72,7 +72,7 @@ func (uc *UserController) FetchUsers(c *gin.Context) {
 // @ID getUser
 // @Produce json
 // @Param identifier path string true "User ID or email"
-// @Success 200 {object} domain.PublicUser "User object"
+// @Success 200 {object} domain.SuccessResponse{data=domain.PublicUser} "User object"
 // @Failure 404 {object} domain.ErrorResponse "Not Found - User not found"
 // @Failure 500 {object} domain.ErrorResponse "Internal Server Error"
 // @Router /user/{identifier} [get]
@@ -86,7 +86,7 @@ func (uc *UserController) GetUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, parser.ToSuccessResponse(user))
 }
 
 // @Summary Update user

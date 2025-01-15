@@ -7,6 +7,7 @@ import (
 
 	"github.com/gabrielfmcoelho/platform-core/domain"
 	"github.com/gabrielfmcoelho/platform-core/internal"
+	"github.com/gabrielfmcoelho/platform-core/internal/parser"
 )
 
 type userServiceLogUsecase struct {
@@ -25,7 +26,7 @@ func NewUserServiceLogUsecase(
 }
 
 // Fetch all UserServiceLog entries
-func (u *userServiceLogUsecase) Fetch(ctx context.Context) ([]domain.UserServiceLog, error) {
+func (u *userServiceLogUsecase) Fetch(ctx context.Context) ([]domain.PublicUserServiceLog, error) {
 	c, cancel := context.WithTimeout(ctx, u.contextTimeout)
 	defer cancel()
 
@@ -36,7 +37,13 @@ func (u *userServiceLogUsecase) Fetch(ctx context.Context) ([]domain.UserService
 		}
 		return nil, domain.ErrInternalServerError
 	}
-	return logs, nil
+
+	PublicLogs := make([]domain.PublicUserServiceLog, 0, len(logs))
+	for _, log := range logs {
+		PublicLogs = append(PublicLogs, parser.ToPublicUserServiceLog(log))
+	}
+
+	return PublicLogs, nil
 }
 
 // GetByIdentifier tries to parse identifier to either:
@@ -44,10 +51,11 @@ func (u *userServiceLogUsecase) Fetch(ctx context.Context) ([]domain.UserService
 // - or if it starts with "user:" -> parse the rest as userID
 // - or if it starts with "service:" -> parse the rest as serviceID
 // Otherwise returns ErrInvalidIdentifier
-func (u *userServiceLogUsecase) GetByIdentifier(ctx context.Context, identifier string) (domain.UserServiceLog, error) {
+func (u *userServiceLogUsecase) GetByIdentifier(ctx context.Context, identifier string) (domain.PublicUserServiceLog, error) {
 	c, cancel := context.WithTimeout(ctx, u.contextTimeout)
 	defer cancel()
 
+	var publicLog domain.PublicUserServiceLog
 	var log domain.UserServiceLog
 	var err error
 
@@ -61,7 +69,7 @@ func (u *userServiceLogUsecase) GetByIdentifier(ctx context.Context, identifier 
 	case internal.IsNumeric(identifier):
 		id, convErr := internal.ParseUint(identifier)
 		if convErr != nil {
-			return log, domain.ErrInvalidIdentifier
+			return publicLog, domain.ErrInvalidIdentifier
 		}
 		log, err = u.userServiceLogRepo.GetByID(c, id)
 
@@ -69,7 +77,7 @@ func (u *userServiceLogUsecase) GetByIdentifier(ctx context.Context, identifier 
 		userIDStr := identifier[5:]
 		id, convErr := internal.ParseUint(userIDStr)
 		if convErr != nil {
-			return log, domain.ErrInvalidIdentifier
+			return publicLog, domain.ErrInvalidIdentifier
 		}
 		log, err = u.userServiceLogRepo.GetByUserID(c, id)
 
@@ -77,23 +85,23 @@ func (u *userServiceLogUsecase) GetByIdentifier(ctx context.Context, identifier 
 		serviceIDStr := identifier[8:]
 		id, convErr := internal.ParseUint(serviceIDStr)
 		if convErr != nil {
-			return log, domain.ErrInvalidIdentifier
+			return publicLog, domain.ErrInvalidIdentifier
 		}
 		log, err = u.userServiceLogRepo.GetByServiceID(c, id)
 
 	default:
 		// not numeric, not user/service pattern
-		return log, domain.ErrInvalidIdentifier
+		return publicLog, domain.ErrInvalidIdentifier
 	}
 
 	if err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
-			return log, domain.ErrNotFound
+			return publicLog, domain.ErrNotFound
 		}
-		return log, domain.ErrInternalServerError
+		return publicLog, domain.ErrInternalServerError
 	}
 
-	return log, nil
+	return parser.ToPublicUserServiceLog(log), nil
 }
 
 // Delete removes a UserServiceLog by ID

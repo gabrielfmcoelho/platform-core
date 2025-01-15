@@ -6,6 +6,7 @@ import (
 
 	"github.com/gabrielfmcoelho/platform-core/bootstrap"
 	"github.com/gabrielfmcoelho/platform-core/domain"
+	"github.com/gabrielfmcoelho/platform-core/internal/parser"
 	"github.com/gin-gonic/gin"
 )
 
@@ -70,7 +71,7 @@ func (lc *AuthController) Login(c *gin.Context) {
 // @ID loginGuest
 // @Accept json
 // @Produce json
-// @Success 200 {object} domain.LoginResponse "Successful login, returns access and refresh tokens"
+// @Success 200 {object} domain.SuccessResponse{data=domain.LoginResponse} "Successful login, returns access and refresh tokens"
 // @Failure 500 {object} domain.ErrorResponse "Internal Server Error"
 // @Router /login-guest [post]
 func (lc *AuthController) LoginGuest(c *gin.Context) {
@@ -88,7 +89,7 @@ func (lc *AuthController) LoginGuest(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, loginResponse)
+	c.JSON(http.StatusOK, parser.ToSuccessResponse(loginResponse))
 }
 
 // @Summary Forgot Password

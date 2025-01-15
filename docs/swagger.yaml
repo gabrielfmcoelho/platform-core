@@ -28,6 +28,25 @@ definitions:
       log_id:
         type: integer
     type: object
+  domain.HubService:
+    properties:
+      description:
+        type: string
+      icon_url:
+        type: string
+      id:
+        type: integer
+      last_update:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      screenshot_url:
+        type: string
+      status:
+        type: string
+    type: object
   domain.LoginRequest:
     properties:
       email:
@@ -45,11 +64,42 @@ definitions:
       refreshToken:
         type: string
     type: object
-  domain.PublicService:
+  domain.MarketingService:
     properties:
+      benefits:
+        items:
+          type: string
+        type: array
+      description:
+        type: string
+      features:
+        items:
+          type: string
+        type: array
+      icon_url:
+        type: string
       id:
         type: integer
+      marketing_name:
+        type: string
+      tag_line:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+    type: object
+  domain.PublicService:
+    properties:
+      app_url:
+        type: string
+      id:
+        type: integer
+      last_update:
+        type: string
       name:
+        type: string
+      status:
         type: string
     type: object
   domain.PublicUser:
@@ -92,8 +142,6 @@ definitions:
       data:
         description: Omits Data field if nil
       message:
-        type: string
-      status:
         type: string
     type: object
   domain.UseService:
@@ -300,7 +348,14 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/domain.PublicService'
+              allOf:
+              - $ref: '#/definitions/domain.SuccessResponse'
+              - properties:
+                  data:
+                    items:
+                      $ref: '#/definitions/domain.PublicService'
+                    type: array
+                type: object
             type: array
         "500":
           description: Internal Server Error
@@ -326,7 +381,12 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/domain.Service'
+            allOf:
+            - $ref: '#/definitions/domain.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.PublicService'
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -353,7 +413,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.PublicService'
+            allOf:
+            - $ref: '#/definitions/domain.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.PublicService'
+              type: object
         "404":
           description: Not Found
           schema:
@@ -408,7 +473,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.Service'
+            allOf:
+            - $ref: '#/definitions/domain.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.PublicService'
+              type: object
         "500":
           description: Internal Server Error
           schema:
@@ -466,7 +536,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.UseService'
+            allOf:
+            - $ref: '#/definitions/domain.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.UseService'
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -510,6 +585,68 @@ paths:
           schema:
             $ref: '#/definitions/domain.ErrorResponse'
       summary: Heartbeat usage
+      tags:
+      - Service
+  /services/marketing:
+    get:
+      description: Gets all marketing services
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              allOf:
+              - $ref: '#/definitions/domain.SuccessResponse'
+              - properties:
+                  data:
+                    items:
+                      $ref: '#/definitions/domain.MarketingService'
+                    type: array
+                type: object
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Get Marketing Services
+      tags:
+      - Service
+  /services/organization/{organizationID}:
+    get:
+      description: Gets all services linked to an organization
+      parameters:
+      - description: Organization ID
+        in: path
+        name: organizationID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              allOf:
+              - $ref: '#/definitions/domain.SuccessResponse'
+              - properties:
+                  data:
+                    items:
+                      $ref: '#/definitions/domain.HubService'
+                    type: array
+                type: object
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Get Services by Organization
       tags:
       - Service
   /user-service-logs:
