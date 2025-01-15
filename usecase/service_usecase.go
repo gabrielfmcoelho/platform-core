@@ -7,6 +7,7 @@ import (
 
 	"github.com/gabrielfmcoelho/platform-core/domain"
 	"github.com/gabrielfmcoelho/platform-core/internal"
+	"github.com/gabrielfmcoelho/platform-core/internal/parser"
 )
 
 type serviceUsecase struct {
@@ -55,7 +56,7 @@ func (su *serviceUsecase) Fetch(ctx context.Context) ([]domain.PublicService, er
 
 	publicServices := make([]domain.PublicService, 0, len(services))
 	for _, s := range services {
-		publicServices = append(publicServices, internal.ParsePublicService(s))
+		publicServices = append(publicServices, parser.ToPublicService(s))
 	}
 	return publicServices, nil
 }
@@ -87,7 +88,53 @@ func (su *serviceUsecase) GetByIdentifier(ctx context.Context, identifier string
 		return publicService, domain.ErrInternalServerError
 	}
 
-	return internal.ParsePublicService(service), nil
+	return parser.ToPublicService(service), nil
+}
+
+// GetByOrganization retorna todos os serviços vinculados a uma organização
+func (su *serviceUsecase) GetByOrganization(ctx context.Context, organizationID uint) ([]domain.HubService, error) {
+	ctx, cancel := context.WithTimeout(ctx, su.contextTimeout)
+	defer cancel()
+
+	services, err := su.serviceRepository.GetByOrganization(ctx, organizationID)
+	if err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return nil, domain.ErrNotFound
+		}
+		if errors.Is(err, domain.ErrDataBaseInternalError) {
+			return nil, domain.ErrDataBaseInternalError
+		}
+		return nil, domain.ErrInternalServerError
+	}
+
+	hubServices := make([]domain.HubService, 0, len(services))
+	for _, s := range services {
+		hubServices = append(hubServices, parser.ToHubService(s))
+	}
+	return hubServices, nil
+}
+
+// GetMarketing retorna todos os serviços de marketing
+func (su *serviceUsecase) GetMarketing(ctx context.Context) ([]domain.MarketingService, error) {
+	ctx, cancel := context.WithTimeout(ctx, su.contextTimeout)
+	defer cancel()
+
+	services, err := su.serviceRepository.GetMarketing(ctx)
+	if err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			return nil, domain.ErrNotFound
+		}
+		if errors.Is(err, domain.ErrDataBaseInternalError) {
+			return nil, domain.ErrDataBaseInternalError
+		}
+		return nil, domain.ErrInternalServerError
+	}
+
+	marketingServices := make([]domain.MarketingService, 0, len(services))
+	for _, s := range services {
+		marketingServices = append(marketingServices, parser.ToMarketingService(s))
+	}
+	return marketingServices, nil
 }
 
 // SetAvailabilityToOrganization vincula o service a uma organização
@@ -109,12 +156,12 @@ func (su *serviceUsecase) SetAvailabilityToOrganization(ctx context.Context, ser
 	return nil
 }
 
-func (su *serviceUsecase) Use(ctx context.Context, userID uint, serviceID uint) (domain.PublicService, uint, error) {
+func (su *serviceUsecase) Use(ctx context.Context, userID uint, serviceID uint) (domain.UseService, uint, error) {
 	ctx, cancel := context.WithTimeout(ctx, su.contextTimeout)
 	defer cancel()
 
 	var service domain.Service
-	var publicService domain.PublicService
+	var useService domain.UseService
 	var logID uint
 
 	log := domain.UserServiceLog{
@@ -125,9 +172,9 @@ func (su *serviceUsecase) Use(ctx context.Context, userID uint, serviceID uint) 
 	err := su.userServiceLogRepository.Create(ctx, &log)
 	if err != nil {
 		if errors.Is(err, domain.ErrDataBaseInternalError) {
-			return publicService, logID, domain.ErrDataBaseInternalError
+			return useService, logID, domain.ErrDataBaseInternalError
 		}
-		return publicService, logID, domain.ErrInternalServerError
+		return useService, logID, domain.ErrInternalServerError
 	}
 
 	logID = log.ID
@@ -135,12 +182,12 @@ func (su *serviceUsecase) Use(ctx context.Context, userID uint, serviceID uint) 
 	service, err = su.serviceRepository.GetByID(ctx, serviceID)
 	if err != nil {
 		if errors.Is(err, domain.ErrNotFound) {
-			return publicService, logID, domain.ErrNotFound
+			return useService, logID, domain.ErrNotFound
 		}
-		return publicService, logID, domain.ErrInternalServerError
+		return useService, logID, domain.ErrInternalServerError
 	}
 
-	return internal.ParsePublicService(service), logID, nil
+	return parser.ToUseService(service), logID, nil
 }
 
 func (su *serviceUsecase) Heartbeat(ctx context.Context, logID uint, duration int) error {

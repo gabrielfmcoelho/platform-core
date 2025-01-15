@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/gabrielfmcoelho/platform-core/domain"
-	"github.com/gabrielfmcoelho/platform-core/internal"
+	"github.com/gabrielfmcoelho/platform-core/internal/parser"
 )
 
 type organizationUsecase struct {
@@ -43,7 +43,7 @@ func (uc *organizationUsecase) Fetch(ctx context.Context) ([]domain.PublicOrgani
 
 	var result []domain.PublicOrganization
 	for _, org := range orgs {
-		result = append(result, internal.ParsePublicOrganization(org))
+		result = append(result, parser.ToPublicOrganization(org))
 	}
 	return result, nil
 }
@@ -65,7 +65,7 @@ func (uc *organizationUsecase) GetByIdentifier(ctx context.Context, identifier s
 	if err != nil {
 		return domain.PublicOrganization{}, err
 	}
-	return internal.ParsePublicOrganization(org), nil
+	return parser.ToPublicOrganization(org), nil
 }
 
 // GetUsers retorna a lista de usuários da organização, convertendo para PublicUser

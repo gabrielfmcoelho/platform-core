@@ -61,6 +61,30 @@ func (r *serviceRepository) GetByName(ctx context.Context, name string) (domain.
 	return service, nil
 }
 
+// GetByOrganization retorna todos os serviços vinculados a uma organização
+func (r *serviceRepository) GetByOrganization(ctx context.Context, organizationID uint) ([]domain.Service, error) {
+	var services []domain.Service
+	if err := r.db.WithContext(ctx).
+		Preload("Organization").
+		Joins("JOIN organization_services ON services.id = organization_services.service_id").
+		Where("organization_services.organization_id = ?", organizationID).
+		Find(&services).Error; err != nil {
+		return nil, domain.ErrDataBaseInternalError
+	}
+	return services, nil
+}
+
+// GetMarketing retorna todos os serviços de marketing
+func (r *serviceRepository) GetMarketing(ctx context.Context) ([]domain.Service, error) {
+	var services []domain.Service
+	if err := r.db.WithContext(ctx).
+		Where("is_marketing = ?", true).
+		Find(&services).Error; err != nil {
+		return nil, domain.ErrDataBaseInternalError
+	}
+	return services, nil
+}
+
 // SetAvailabilityToOrganization vincula o service a uma organização na tabela pivô (many2many)
 func (r *serviceRepository) SetAvailabilityToOrganization(ctx context.Context, serviceID uint, organizationID uint) error {
 	// Para associar, precisamos obter primeiro o service e a organization

@@ -7,6 +7,7 @@ import (
 
 	"github.com/gabrielfmcoelho/platform-core/domain"
 	"github.com/gabrielfmcoelho/platform-core/internal"
+	"github.com/gabrielfmcoelho/platform-core/internal/parser"
 	"github.com/gabrielfmcoelho/platform-core/internal/password"
 )
 
@@ -37,7 +38,7 @@ func (uu *UserUsecase) Create(c context.Context, createUser *domain.CreateUser) 
 	}
 	createUser.Password = hashedPassword
 
-	user := internal.ParseCreateUser(createUser)
+	user := parser.ToUser(createUser)
 
 	err = uu.userRepository.Create(ctx, user)
 	if err != nil {
@@ -65,7 +66,7 @@ func (uu *UserUsecase) Fetch(c context.Context) ([]domain.PublicUser, error) {
 	// parse the users to domain.PublicUser
 	publicUsers := make([]domain.PublicUser, 0)
 	for _, user := range users {
-		publicUsers = append(publicUsers, internal.ParsePublicUser(user))
+		publicUsers = append(publicUsers, parser.ToPublicUser(user))
 	}
 
 	return publicUsers, nil
@@ -100,7 +101,7 @@ func (uu *UserUsecase) GetByIdentifier(c context.Context, identifier string) (do
 	} else {
 		return publicUser, domain.ErrInvalidIdentifier
 	}
-	return internal.ParsePublicUser(user), nil
+	return parser.ToPublicUser(user), nil
 }
 
 func (uu *UserUsecase) Update(c context.Context, userID uint, user *domain.User) error {

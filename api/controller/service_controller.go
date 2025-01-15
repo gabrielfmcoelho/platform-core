@@ -9,6 +9,7 @@ import (
 	"github.com/gabrielfmcoelho/platform-core/bootstrap"
 	"github.com/gabrielfmcoelho/platform-core/domain"
 	"github.com/gabrielfmcoelho/platform-core/internal"
+	"github.com/gabrielfmcoelho/platform-core/internal/parser"
 	"github.com/gabrielfmcoelho/platform-core/internal/tokenutil"
 	"github.com/gin-gonic/gin"
 )
@@ -25,7 +26,7 @@ type ServiceController struct {
 // @Accept json
 // @Produce json
 // @Param service body domain.Service true "Service data"
-// @Success 201 {object} domain.Service
+// @Success 201 {object} domain.SuccessResponse{data=domain.PublicService}
 // @Failure 400 {object} domain.ErrorResponse
 // @Failure 500 {object} domain.ErrorResponse
 // @Router /services [post]
@@ -41,9 +42,8 @@ func (sc *ServiceController) CreateService(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
 		return
 	}
-
 	// Retornar o service criado (ou alguma versão pública dele)
-	c.JSON(http.StatusCreated, service)
+	c.JSON(http.StatusCreated, parser.ToSuccessResponse(parser.ToPublicService(service)))
 }
 
 // FetchServices retorna todos os serviços
@@ -60,7 +60,7 @@ func (sc *ServiceController) FetchServices(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, services)
+	c.JSON(http.StatusOK, parser.ToSuccessResponse(services))
 }
 
 // GetServiceByIdentifier retorna um serviço por ID ou nome
@@ -69,7 +69,7 @@ func (sc *ServiceController) FetchServices(c *gin.Context) {
 // @Tags Service
 // @Produce json
 // @Param identifier path string true "Service ID or Name"
-// @Success 200 {object} domain.PublicService
+// @Success 200 {object} domain.SuccessResponse{data=domain.PublicService}
 // @Failure 404 {object} domain.ErrorResponse
 // @Failure 500 {object} domain.ErrorResponse
 // @Router /services/{identifier} [get]
@@ -86,8 +86,55 @@ func (sc *ServiceController) GetServiceByIdentifier(c *gin.Context) {
 		}
 		return
 	}
+	c.JSON(http.StatusOK, parser.ToSuccessResponse(service))
+}
 
-	c.JSON(http.StatusOK, service)
+// GetServicesByOrganization retorna os serviços de uma organização
+// @Summary Get Services by Organization
+// @Description Gets all services linked to an organization
+// @Tags Service
+// @Produce json
+// @Param organizationID path int true "Organization ID"
+// @Success 200 {array} domain.SuccessResponse{data=[]domain.HubService}
+// @Failure 404 {object} domain.ErrorResponse
+// @Failure 500 {object} domain.ErrorResponse
+// @Router /services/organization/{organizationID} [get]
+func (sc *ServiceController) GetServicesByOrganization(c *gin.Context) {
+	organizationID := c.Param("organizationID")
+
+	oID, err := internal.ParseUint(organizationID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, domain.ErrorResponse{Message: "Invalid organizationID"})
+		return
+	}
+
+	services, err := sc.ServiceUsecase.GetByOrganization(c, oID)
+	if err != nil {
+		switch err {
+		case domain.ErrNotFound:
+			c.JSON(http.StatusNotFound, domain.ErrorResponse{Message: err.Error()})
+		default:
+			c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
+		}
+	}
+	c.JSON(http.StatusOK, parser.ToSuccessResponse(services))
+}
+
+// GetMarketingServices retorna todos os serviços de marketing
+// @Summary Get Marketing Services
+// @Description Gets all marketing services
+// @Tags Service
+// @Produce json
+// @Success 200 {array} domain.SuccessResponse{data=[]domain.MarketingService}
+// @Failure 500 {object} domain.ErrorResponse
+// @Router /services/marketing [get]
+func (sc *ServiceController) GetMarketingServices(c *gin.Context) {
+	services, err := sc.ServiceUsecase.GetMarketing(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, parser.ToSuccessResponse(services))
 }
 
 // SetServiceAvailabilityToOrganization vincula um service a uma organização
@@ -140,7 +187,7 @@ func (sc *ServiceController) SetServiceAvailabilityToOrganization(c *gin.Context
 // @Accept json
 // @Produce json
 // @Param serviceID path int true "Service ID"
-// @Success 200 {object} domain.UseService
+// @Success 200 {object} domain.SuccessResponse{data=domain.UseService}
 // @Failure 400 {object} domain.ErrorResponse
 // @Failure 404 {object} domain.ErrorResponse
 // @Failure 500 {object} domain.ErrorResponse
@@ -181,11 +228,10 @@ func (sc *ServiceController) UseService(c *gin.Context) {
 		return
 	}
 
+	service.LogID = logID
+
 	// 4) Return result
-	c.JSON(http.StatusOK, domain.UseService{
-		LogID:   logID,
-		Service: service,
-	})
+	c.JSON(http.StatusOK, parser.ToSuccessResponse(service))
 }
 
 // HeartbeatService
@@ -230,7 +276,7 @@ func (sc *ServiceController) HeartbeatService(c *gin.Context) {
 // @Produce json
 // @Param serviceID path int true "Service ID"
 // @Param service body domain.Service true "Service data"
-// @Success 200 {object} domain.Service
+// @Success 200 {object} domain.SuccessResponse{data=domain.PublicService}
 // @Failure 500 {object} domain.ErrorResponse
 // @Router /services/{serviceID} [put]
 func (sc *ServiceController) UpdateService(c *gin.Context) {
@@ -255,7 +301,7 @@ func (sc *ServiceController) UpdateService(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, service)
+	c.JSON(http.StatusOK, parser.ToSuccessResponse(parser.ToPublicService(service)))
 }
 
 // DeleteService deleta um service

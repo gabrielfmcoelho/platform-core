@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/gabrielfmcoelho/platform-core/domain"
-	"github.com/gabrielfmcoelho/platform-core/internal"
+	"github.com/gabrielfmcoelho/platform-core/internal/parser"
 	"github.com/gabrielfmcoelho/platform-core/internal/password"
 	"gorm.io/gorm"
 )
@@ -53,7 +53,7 @@ func SeedUsers(db *gorm.DB) error {
 				return err
 			}
 			u.Password = hashedPassword
-			user := internal.ParseCreateUser(&u)
+			user := parser.ToUser(&u)
 			if err := db.Create(&user).Error; err != nil {
 				return err
 			}
